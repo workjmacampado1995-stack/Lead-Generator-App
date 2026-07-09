@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>US Outreach CRM</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <section class="hero">
+        <div class="hero-row">
+          <div>
+            <h1>Salvation Territory</h1>
+            <p>Manage leads and send outreach from the Philippines to U.S. clients.</p>
+          </div>
+          <div class="header-actions">
+            <span>Signed in as {{ username }}</span>
+            <form action="/logout" method="post">
+              <button type="submit">Logout</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>Add a lead</h2>
+          <form action="/leads" method="post">
+            <input name="name" placeholder="Contact name" required />
+            <input name="company" placeholder="Company" />
+            <input name="email" placeholder="Email" />
+            <input name="phone" placeholder="Phone" />
+            <input name="location" placeholder="Location" />
+            <input name="status" placeholder="Status" value="New" />
+            <textarea name="notes" placeholder="Notes"></textarea>
+            <button type="submit">Save lead</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Import leads from CSV</h2>
+          <form action="/import" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv" required />
+            <button type="submit">Import</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Outreach settings</h2>
+        <form action="/settings" method="post" class="settings-form">
+          <input name="smtp_host" placeholder="SMTP host" value="{{ settings.smtp_host }}" />
+          <input name="smtp_port" placeholder="SMTP port" value="{{ settings.smtp_port }}" />
+          <input name="smtp_username" placeholder="SMTP username" value="{{ settings.smtp_username }}" />
+          <input name="smtp_password" placeholder="SMTP password" type="password" value="{{ settings.smtp_password }}" />
+          <input name="smtp_from" placeholder="From email" value="{{ settings.smtp_from }}" />
+          <input name="sender_name" placeholder="Your name" value="{{ settings.sender_name }}" />
+          <input name="business_name" placeholder="Your business name" value="{{ settings.business_name }}" />
+          <input name="sender_contact" placeholder="Phone/Email" value="{{ settings.sender_contact }}" />
+          <input name="email_subject" placeholder="Email subject" value="{{ settings.email_subject }}" />
+          <textarea name="email_template" rows="12">{{ settings.email_template }}</textarea>
+          <button type="submit">Save settings</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <form action="/cold-outreach/send" method="post">
+          <button type="submit">Send cold outreach to all unsent leads</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Leads</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Company</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lead in leads %}
+            <tr>
+              <td>{{ lead.name }}</td>
+              <td>{{ lead.company }}</td>
+              <td>{{ lead.email }}</td>
+              <td>{{ lead.phone }}</td>
+              <td>{{ lead.status }}</td>
+              <td>{{ lead.notes }}</td>
+              <td>
+                <form action="/leads/{{ lead.id }}/status" method="post" class="inline-form">
+                  <input type="text" name="status" value="{{ lead.status }}" />
+                  <textarea name="notes" placeholder="Update notes"></textarea>
+                  <button type="submit">Update</button>
+                </form>
+                <form action="/leads/{{ lead.id }}/send" method="post" class="inline-form">
+                  <input type="text" name="subject" placeholder="Email subject" value="{{ settings.email_subject }}" />
+                  <textarea name="body" placeholder="Email body">{{ settings.email_template }}</textarea>
+                  <button type="submit">Send</button>
+                </form>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7">No leads yet. Add one or import a CSV file.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>
